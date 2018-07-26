@@ -112,7 +112,7 @@ class PERSPECTIVE_EXPORT t_gstate
     void reset();
 
     const t_schema& get_port_schema() const;
-	t_uidxvec get_pkeys_idx(const t_tscalvec& pkeys) const;
+    t_uidxvec get_pkeys_idx(const t_tscalvec& pkeys) const;
 
   protected:
     t_dtype get_pkey_dtype() const;
@@ -126,7 +126,6 @@ class PERSPECTIVE_EXPORT t_gstate
     t_free_items m_free;
     t_symtable m_symtable;
   	t_col_sptr m_pkcol;
-  	t_col_sptr m_opcol;
 };
 
 template <typename FN_T>

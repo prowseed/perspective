@@ -567,6 +567,11 @@ t_mask
 t_table::filter_cpp(t_filter_op combiner,
                     const t_ftermvec& fterms_) const
 {
+    #ifdef PSP_ENABLE_PYTHON
+    static bool const enable_interned_filtering = false; //athena::Conf_proc::isFeatureEnabled("PSP_ENABLE_INTERNED_FILTERING"); 
+    #else
+    static bool const enable_interned_filtering = true;
+    #endif
 
     auto self = const_cast<t_table*>(this);
     auto fterms = fterms_;
@@ -581,10 +586,9 @@ t_table::filter_cpp(t_filter_op combiner,
         indices[idx] = m_schema.get_colidx(fterms[idx].m_colname);
         columns[idx] = get_const_column(fterms[idx].m_colname).get();
         fterms[idx].coerce_numeric(columns[idx]->get_dtype());
-        auto op = fterms[idx].m_op;
-        t_tscalar& thr = fterms[idx].m_threshold;
-        if (fterms[idx].m_use_interned)
+        if (fterms[idx].m_use_interned && enable_interned_filtering)
         {
+            t_tscalar& thr = fterms[idx].m_threshold;
             auto col = self->get_column(fterms[idx].m_colname);
             auto interned = col->get_interned(thr.get_char_ptr());
             thr.set(interned);
@@ -611,7 +615,7 @@ t_table::filter_cpp(t_filter_op combiner,
                     const auto& ft = fterms[cidx];
                     t_bool tval;
 
-                    if (ft.m_use_interned)
+                    if (ft.m_use_interned && enable_interned_filtering)
                     {
                         cell_val.set(
                             *(columns[cidx]->get_nth<t_stridx>(ridx)));
@@ -623,7 +627,7 @@ t_table::filter_cpp(t_filter_op combiner,
                         tval = ft(cell_val);
                     }
 
-                    if (!tval)
+                    if (!cell_val.is_valid() || !tval)
                     {
                         pass = false;
                         break;
@@ -875,7 +879,7 @@ t_table::fill_expr_helper(const t_svec& icol_names,
             struct cmp_str
             {
                 bool
-                operator()(const char* a, const char* b)
+                operator()(const char* a, const char* b) const
                 {
                     return std::strcmp(a, b) < 0;
                 }

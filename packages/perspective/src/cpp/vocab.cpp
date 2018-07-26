@@ -46,11 +46,21 @@ void
 t_vocab::rebuild_map()
 {
     m_map.clear();
+    m_map.reserve((size_t)m_vlenidx);
     for (t_uindex idx = 0; idx < m_vlenidx; ++idx)
     {
         m_map[unintern_c(idx)] = idx;
     }
 }
+
+void 
+t_vocab::reserve(size_t total_string_size, size_t string_count)
+{
+    m_vlendata->reserve( total_string_size );
+    m_extents->reserve( sizeof(t_uidxpair) * string_count );
+    rebuild_map();
+}
+
 
 t_bool
 t_vocab::string_exists(const char* c, t_stridx& interned) const
@@ -83,10 +93,12 @@ t_vocab::get_interned(const char* s)
         bidx = m_vlendata->size();
         eidx = bidx + len;
         const void* obase = m_vlendata->get_nth<const char>(0);
+        const void* oebase = m_extents->get_nth<t_uidxpair>(0);
         m_vlendata->push_back(static_cast<const void*>(s), len);
         m_extents->push_back(t_uidxpair(bidx, eidx));
         const void* nbase = m_vlendata->get_nth<const char>(0);
-        if (obase == nbase)
+        const void* nebase = m_extents->get_nth<t_uidxpair>(0);
+        if ((obase == nbase) && (oebase == nebase))
         {
             m_map[unintern_c(idx)] = idx;
         }
@@ -135,7 +147,7 @@ t_vocab::init(t_bool from_recipe)
     {
         rebuild_map();
     }
-    //get_interned("");
+    get_interned("");
 }
 
 t_uindex

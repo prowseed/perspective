@@ -41,12 +41,10 @@ t_gstate::init()
 {
     m_table = std::make_shared<t_table>("",
                                         "",
-                                        m_pkeyed_schema,
+                                        m_tblschema,
                                         DEFAULT_EMPTY_CAPACITY,
                                         BACKING_STORE_MEMORY);
     m_table->init();
-    m_pkcol = m_table->get_column("psp_pkey");
-    m_opcol = m_table->get_column("psp_op");
     m_init = true;
 }
 
@@ -125,8 +123,6 @@ t_gstate::lookup_or_create(const t_tscalar& pkey)
     }
 
     m_table->set_size(nrows + 1);
-    m_opcol->set_nth<t_uint8>(nrows, OP_INSERT);
-    m_pkcol->set_scalar(nrows, pkey);
     m_mapping[pkey_] = nrows;
     return nrows;
 }
@@ -155,9 +151,12 @@ t_gstate::update_history(const t_table* tbl)
          ++idx)
     {
         const t_str& cname = fschema.m_columns[idx];
-        col_translation[count] = idx;
-        fcolumns[idx] = tbl->get_const_column(cname).get();
-        ++count;
+        if (cname != opname && cname != pkeyname)
+        {
+            col_translation[count] = idx;
+            fcolumns[idx] = tbl->get_const_column(cname).get();
+            ++count;
+        }
     }
 
     t_colptrvec scolumns(ncols);
@@ -189,9 +188,6 @@ t_gstate::update_history(const t_table* tbl)
 #ifdef PSP_PARALLEL_FOR
                  );
 #endif
-        m_pkcol = stable->get_column("psp_pkey");
-        m_opcol = stable->get_column("psp_op");
-
         stable->set_capacity(tbl->get_capacity());
         stable->set_size(tbl->size());
 
@@ -209,8 +205,6 @@ t_gstate::update_history(const t_table* tbl)
                 {
                     m_mapping[m_symtable.get_interned_tscalar(pkey)] =
                         idx;
-                    m_opcol->set_nth<t_uint8>(idx, OP_INSERT);
-                    m_pkcol->set_scalar(idx, pkey);
                 }
                 break;
                 case OP_DELETE:
@@ -248,9 +242,6 @@ t_gstate::update_history(const t_table* tbl)
             case OP_INSERT:
             {
                 stableidx_vec[idx] = lookup_or_create(pkey);
-                m_opcol->set_nth<t_uint8>(stableidx_vec[idx],
-                                          OP_INSERT);
-                m_pkcol->set_scalar(stableidx_vec[idx], pkey);
             }
             break;
             case OP_DELETE:
@@ -629,8 +620,6 @@ t_gstate::get_pkeyed_table(const t_schema& schema) const
 t_table_sptr
 t_gstate::get_pkeyed_table() const
 {
-    if (m_mapping.size() == m_table->size())
-        return m_table;
     return t_table_sptr(_get_pkeyed_table(m_pkeyed_schema));
 }
 
@@ -762,10 +751,33 @@ t_gstate::_get_pkeyed_table(const t_schema& schema,
     if (get_pkey_dtype() == DTYPE_STR)
     {
         static const t_tscalar empty = get_interned_tscalar("");
+#ifdef PSP_ENABLE_PYTHON
+        static bool const enable_pkeyed_table_vocab_reserve = athena::Conf_proc::isFeatureEnabled("PSP_GNODE_PKEYED_TABLE_VOCAB_RESERVE");
+#else
+        static bool const enable_pkeyed_table_vocab_reserve = true;
+#endif
 
         t_uindex offset = has_pkey(empty) ? 0 : 1;
 
-        pkey_col->set_vocabulary(order);
+        size_t total_string_size = 0;
+
+        if( enable_pkeyed_table_vocab_reserve )
+        {
+            total_string_size += offset;
+            for (t_uindex idx = 0, loop_end = order.size();
+                 idx < loop_end;
+                 ++idx)
+            {
+                total_string_size += strlen(order[idx].first.get_char_ptr()) + 1;
+            }
+        }
+
+        // if the m_mapping is empty, get_pkey_dtype() may lie about our pkeys being strings
+        // don't try to reserve in this case
+        if( !order.size() )
+            total_string_size = 0;
+
+        pkey_col->set_vocabulary(order, total_string_size);
         auto base = pkey_col->get_nth<t_uindex>(0);
 
         for (t_uindex idx = 0, loop_end = order.size();

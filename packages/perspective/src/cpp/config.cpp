@@ -218,18 +218,18 @@ t_config::setup(const t_svec& detail_columns,
             case AGGTYPE_ANY:
             case AGGTYPE_FIRST:
             case AGGTYPE_LAST:
-			case AGGTYPE_MEAN:
-			case AGGTYPE_WEIGHTED_MEAN:
-			case AGGTYPE_UNIQUE:
+            case AGGTYPE_MEAN:
+            case AGGTYPE_WEIGHTED_MEAN:
+            case AGGTYPE_UNIQUE:
             case AGGTYPE_MEDIAN:
             case AGGTYPE_JOIN:
             case AGGTYPE_DOMINANT:
             case AGGTYPE_PY_AGG:
-			case AGGTYPE_SUM_NOT_NULL:
-			case AGGTYPE_SUM_ABS:
-			case AGGTYPE_MUL:
-			case AGGTYPE_DISTINCT_COUNT:
-			case AGGTYPE_DISTINCT_LEAF:
+            case AGGTYPE_SUM_NOT_NULL:
+            case AGGTYPE_SUM_ABS:
+            case AGGTYPE_MUL:
+            case AGGTYPE_DISTINCT_COUNT:
+            case AGGTYPE_DISTINCT_LEAF:
                 m_has_pkey_agg = true;
                 break;
             default:
