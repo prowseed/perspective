@@ -111,12 +111,14 @@ t_vocab::get_interned(const char* s)
     {
         idx = iter->second;
     }
+#ifndef PSP_ENABLE_WASM
 #ifdef PSP_COLUMN_VERIFY
     if (t_str(s) == "")
     {
         PSP_VERBOSE_ASSERT(idx == 0,
                            "Expected empty string to map to 0");
     }
+#endif
 #endif
     return idx;
 }
@@ -147,7 +149,9 @@ t_vocab::init(t_bool from_recipe)
     {
         rebuild_map();
     }
+    #ifndef PSP_ENABLE_WASM
     get_interned("");
+    #endif //PSP_ENABLE_WASM
 }
 
 t_uindex
@@ -166,13 +170,17 @@ t_vocab::verify() const
         rlookup[kv.second] = kv.first;
     }
 
+#ifndef PSP_ENABLE_WASM
     auto zero = rlookup.find(t_stridx(0));
     PSP_VERBOSE_ASSERT(zero != rlookup.end(), "0 Not found");
     PSP_VERBOSE_ASSERT(t_str(zero->second) == "",
                        "0 mapped to unknown");
+#endif
 
     std::unordered_set<t_str> seen;
+#ifndef PSP_ENABLE_WASM
     seen.insert(t_str(""));
+#endif
 
     for (t_uindex idx = 1; idx < m_vlenidx; ++idx)
     {
