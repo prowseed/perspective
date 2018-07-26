@@ -1012,8 +1012,14 @@ t_stree::update_aggs_from_static(const t_dtree_ctx& ctx,
     cols_topo_sorted.clear();
     cols_topo_sorted.reserve(col_cnt);
 
+#ifdef PSP_ENABLE_PYTHON
     static bool const enable_aggregate_reordering = athena::Conf_proc::isFeatureEnabled("PSP_AGGREGATE_REORDERING"); 
     static bool const enable_fix_double_calculation = athena::Conf_proc::isFeatureEnabled("PSP_FIX_DOUBLE_CALC"); 
+#else // PSP_ENABLE_PYTHON
+    static bool const enable_aggregate_reordering = true; 
+    static bool const enable_fix_double_calculation = true; 
+#endif
+
 
     std::unordered_set< t_column* > dst_visited;
     auto push_column = [&]( size_t idx )
