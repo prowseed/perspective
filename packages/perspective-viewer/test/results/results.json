@@ -11,7 +11,14 @@
     "superstore.html/sorts by a hidden column.": "14e9a80ef0bc2612c48cc9399c87a119",
     "superstore.html/click on add computed column button opens the UI.": "bfe90d64109f1990b60fa6422e9ce109",
     "superstore.html/click on close button closes the UI.": "b8a159e55364a3f91cda9fdf7fddf11a",
+    "superstore.html/setting a valid column should set it as input.": "3c9964c8d4459bb8f1da4c9b0c445bd5",
+    "superstore.html/computations of the same type should not clear input column.": "2dd6cfcc17cc780fc7ea71f283200e10",
+    "superstore.html/saving a computed column should add it to inactive columns.": "182fb582f1d4eecac9c4d771712a024d",
     "superstore.html/saving without parameters should show an error message.": "37bfd97ebd449e26ec4e931f50d78a7e",
+    "superstore.html/aggregates by computed column.": "a0d30de79b16539334827e4f70ff9cae",
+    "superstore.html/pivots by computed column.": "25c602c2dda3a6c27e62cf5db1b5ceee",
+    "superstore.html/sorts by computed column.": "d808309028a5af20bb0a39622e8ab6d1",
+    "superstore.html/filters by computed column.": "00c8204d0241cd095b0f6bfdb06bb3e8",
     "superstore.html/shows horizontal columns on small viewports.": "d3b6a37af9f22a023f49f0abe073d808",
     "blank.html/Handles reloading with a schema.": "9a62c950ef20efa452d4849fa4d6ae14"
 }
