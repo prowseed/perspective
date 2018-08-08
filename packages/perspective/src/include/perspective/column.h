@@ -17,6 +17,7 @@
 #include <perspective/mask.h>
 #include <perspective/compat.h>
 #include <perspective/vocab.h>
+#include <perspective/config_proc.h>
 #include <functional>
 #include <limits>
 #include <cmath>
@@ -493,7 +494,11 @@ template <typename DATA_T>
 t_histogram
 t_column::build_histogram(t_uindex nbuckets, t_mask* mask) const
 {
+#ifdef PSP_ENABLE_PYTHON
+    static bool const enable_gethistogram_fix = athena::Conf_proc::isFeatureEnabled("PSP_COLUMN_GET_HISTOGRAM_FIX");
+#else
     static bool const enable_gethistogram_fix = true;
+#endif
 
     DATA_T histmin = std::numeric_limits<DATA_T>::max();
     DATA_T histmax = std::numeric_limits<DATA_T>::min();

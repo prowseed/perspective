@@ -16,6 +16,7 @@
 #include <perspective/tree_context_common.h>
 #include <perspective/logtime.h>
 #include <perspective/traversal.h>
+#include <perspective/config_proc.h> 
 
 namespace perspective
 {
@@ -349,7 +350,11 @@ t_ctx2::get_data(t_tvidx start_row,
                  t_tvidx start_col,
                  t_tvidx end_col) const
 {
+#ifdef PSP_ENABLE_PYTHON
+    static bool const enable_getdata_fix = athena::Conf_proc::isFeatureEnabled("PSP_CTX2_GET_DATA_FIX");
+#else
     static bool const enable_getdata_fix = true;
+#endif
 
     if( !enable_getdata_fix )
         return get_data_old_path( start_row, end_row, start_col, end_col );

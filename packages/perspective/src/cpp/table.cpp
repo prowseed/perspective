@@ -567,7 +567,11 @@ t_mask
 t_table::filter_cpp(t_filter_op combiner,
                     const t_ftermvec& fterms_) const
 {
+    #ifdef PSP_ENABLE_PYTHON
+    static bool const enable_interned_filtering = false; //athena::Conf_proc::isFeatureEnabled("PSP_ENABLE_INTERNED_FILTERING"); 
+    #else
     static bool const enable_interned_filtering = true;
+    #endif
 
     auto self = const_cast<t_table*>(this);
     auto fterms = fterms_;

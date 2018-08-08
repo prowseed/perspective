@@ -126,7 +126,6 @@ class PERSPECTIVE_EXPORT t_gstate
     t_free_items m_free;
     t_symtable m_symtable;
   	t_col_sptr m_pkcol;
-  	t_col_sptr m_opcol;
 };
 
 template <typename FN_T>

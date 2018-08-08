@@ -28,6 +28,7 @@
 #include <perspective/filter_utils.h>
 #include <perspective/context_two.h>
 #include <unordered_set>
+#include <perspective/config_proc.h> 
 
 namespace perspective
 {
@@ -1011,8 +1012,14 @@ t_stree::update_aggs_from_static(const t_dtree_ctx& ctx,
     cols_topo_sorted.clear();
     cols_topo_sorted.reserve(col_cnt);
 
+#ifdef PSP_ENABLE_PYTHON
+    static bool const enable_aggregate_reordering = athena::Conf_proc::isFeatureEnabled("PSP_AGGREGATE_REORDERING"); 
+    static bool const enable_fix_double_calculation = athena::Conf_proc::isFeatureEnabled("PSP_FIX_DOUBLE_CALC"); 
+#else // PSP_ENABLE_PYTHON
     static bool const enable_aggregate_reordering = true; 
     static bool const enable_fix_double_calculation = true; 
+#endif
+
 
     std::unordered_set< t_column* > dst_visited;
     auto push_column = [&]( size_t idx )
@@ -1230,7 +1237,11 @@ t_stree::update_agg_table(t_uindex nidx,
                           t_index nstrands,
                           const t_gstate& gstate)
 {
+    #ifdef PSP_ENABLE_PYTHON
+    static bool const enable_sticky_nan_fix = athena::Conf_proc::isFeatureEnabled("PSP_STICKY_NAN_FIX");
+    #else
     static bool const enable_sticky_nan_fix = true;
+    #endif
     for (t_uindex idx : info.m_dst_topo_sorted)
     {
         const t_column* src = info.m_src[idx];
