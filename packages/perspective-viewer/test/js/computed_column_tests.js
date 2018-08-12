@@ -21,6 +21,7 @@ const add_computed_column = async (page) => {
     });
     await page.select('#psp-cc-computation__select', 'day_of_week');
     await page.click('#psp-cc-button-save');
+    await page.waitForSelector('perspective-viewer:not([updating])');
 }
 
 exports.default = function() {
